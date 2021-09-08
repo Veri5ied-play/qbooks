@@ -11,18 +11,37 @@ import "./SearchResult.css";
 function SearchResult() {
   const { error, loading, data } = useQuery(GET_BOOKS);
   const searchTerm = "Effective"; // TODO: Set Search Term
-  const search_items = data.books.filter(book => book.title.includes(searchTerm));
- 
+  const search_items = data.books.filter(
+    (book) =>
+      book.title.includes(searchTerm) ||
+      book.authors
+        .map((author) => author.name)
+        .join(" ")
+        .includes(searchTerm) ||
+      book.genres
+        .map((genre) => genre.name)
+        .join(" ")
+        .includes(searchTerm)
+  );
+
   return (
     <>
       <Navbar />
       <div className="search">
         <div className="search__title">
-          <h2>{search_items.length} Results found for {searchTerm}</h2>
+          <h2>
+            {search_items.length} Results found for {searchTerm}
+          </h2>
           <hr />
         </div>
         <div className="search__library">
-          {loading ? <>Loading...</> : error ? <>Error</> : search_items.map(book => <SearchItem key={book.id} book={book} />)}
+          {loading ? (
+            <>Loading...</>
+          ) : error ? (
+            <>Error</>
+          ) : (
+            search_items.map((book) => <SearchItem key={book.id} book={book} />)
+          )}
         </div>
       </div>
     </>
@@ -33,13 +52,21 @@ const SearchItem = ({ book }) => (
   <div className="search__details">
     {/* {downloads, likes} = books */}
     <div className="search__img">
-      <img style={{height: "183px", width: "110px", objectFit: "contain"}} src={book.image_url} alt="Effective Engineer" />
+      <img
+        style={{ height: "183px", width: "110px", objectFit: "contain" }}
+        src={book.image_url}
+        alt="Effective Engineer"
+      />
     </div>
     <div className="search__description">
       <div className="search__layouts">
         <h3>{book.title}</h3>
-        <p className="author">{book.authors.map(author => author.name).join(" | ")}</p>
-        <p className="genre">{book.genres.map(genre => genre.name).join(" | ")}</p>
+        <p className="author">
+          {book.authors.map((author) => author.name).join(" | ")}
+        </p>
+        <p className="genre">
+          {book.genres.map((genre) => genre.name).join(" | ")}
+        </p>
       </div>
       <div className="search__rank">
         <div className="users__likes">
@@ -60,7 +87,11 @@ const SearchItem = ({ book }) => (
           <p>${book.price}</p>
         </div>
         <div className="search__instock">
-          <p>{book.available_copies} Copies Available</p>
+          {book.available_copies === 0 ? (
+            <p>Out of Stock</p>
+          ) : (
+            <p>{book.available_copies} Copies Available</p>
+          )}
         </div>
       </div>
       <div className="search__checkout">
